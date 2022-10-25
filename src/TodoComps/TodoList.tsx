@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 
 interface Task{
     name: string;
@@ -32,7 +32,16 @@ export default class TodoList extends React.Component<{ owner: string }, { todoe
                         <ul>
                         {todo.tasks.map(task =>
                             <li key={`${todo.id}-${task.name}`}>
-                            <input type="checkbox" checked={task.isComplete} />{task.name} </li>)}
+                                <input type="checkbox" 
+                                    onChange={async () => {
+                                        this.state.todoes.find(td => td.id===todo.id)!
+                                            .tasks.find(t => t.name===task.name)!.isComplete = !task.isComplete  
+                                        if (await this.update(todo)){
+                                            this.setState({ todoes: this.state.todoes, loading: false}) 
+                                        }
+                                    }}
+                                    checked={task.isComplete} />{task.isComplete? <s>{task.name}</s> : task.name}
+                            </li>)}
                         </ul>
                     </div>
                 )
@@ -56,5 +65,17 @@ export default class TodoList extends React.Component<{ owner: string }, { todoe
         const response = await fetch("https://localhost:44314/todo")
         const data = await response.json()
         this.setState({todoes: data, loading: false})
+    }
+
+    async update(td: Todo): Promise<boolean> {
+        const response = await fetch(`https://localhost:44314/todo/upd/${td.id}`,
+            {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(td)
+            })
+        return response.ok
     }
 }
