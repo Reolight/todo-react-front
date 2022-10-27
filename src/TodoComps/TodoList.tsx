@@ -1,58 +1,26 @@
 import React from "react";
-
-interface Task{
-    name: string;
-    isComplete: boolean;
-}
-
-interface Todo{
-    id: string;
-    name: string;
-    owner: string;
-    tasks: Task[];
-}
+import Todo from "./interfaces/Todo"
+import Task from "./interfaces/Task"
+import TodoView from "./TodoView";
 
 export default class TodoList extends React.Component<{ owner: string }, { todoes: Todo[], loading: boolean }>
 {
     constructor (props: any){
         super(props)
         this.state = { todoes: [], loading: true}
+        this.updateTodo = this.updateTodo.bind(this)
     }
 
     componentDidMount(): void {
         this.populate()
     }
 
-    renderTodoes(todoes: Todo[]) {
-        return (<div>
-            {
-                todoes.map(todo =>
-                    <div key={todo.id}>
-                        <h3>{todo.name} <i>({todo.owner})</i> </h3>                        
-                        <ul>
-                        {todo.tasks.map(task =>
-                            <li key={`${todo.id}-${task.name}`}>
-                                <input type="checkbox" 
-                                    onChange={async () => {
-                                        this.state.todoes.find(td => td.id===todo.id)!
-                                            .tasks.find(t => t.name===task.name)!.isComplete = !task.isComplete  
-                                        if (await this.update(todo)){
-                                            this.setState({ todoes: this.state.todoes, loading: false}) 
-                                        }
-                                    }}
-                                    checked={task.isComplete} />{task.isComplete? <s>{task.name}</s> : task.name}
-                            </li>)}
-                        </ul>
-                    </div>
-                )
-            }
-        </div>)
-    }
-
     render() {
         var comp = this.state.loading ? <p><em>Loading...</em></p>
-            : this.renderTodoes(this.state.todoes);
-        
+            : this.state.todoes.map(td =>
+                <TodoView key={td.id} todo={td} callback={this.updateTodo} />
+            )
+
         return(
             <div>
                 <h1 id="todoList">ToDoes</h1>
@@ -61,13 +29,22 @@ export default class TodoList extends React.Component<{ owner: string }, { todoe
         )
     }
 
+    async updateTodo(todo: Todo, taskName: string) {
+        var task = todo.tasks.find(task => task.name == taskName)!
+        this.state.todoes.find(t => t == todo)!
+            .tasks.find(ts => ts.name === taskName)!.isComplete = !task.isComplete
+        if (await this.updateOnBack(todo)){
+            this.setState({ todoes: this.state.todoes, loading: false}) 
+        }
+    }
+
     async populate() {
         const response = await fetch("https://localhost:44314/todo")
         const data = await response.json()
         this.setState({todoes: data, loading: false})
     }
 
-    async update(td: Todo): Promise<boolean> {
+    async updateOnBack(td: Todo): Promise<boolean> {
         const response = await fetch(`https://localhost:44314/todo/upd/${td.id}`,
             {
                 method: "PUT",
