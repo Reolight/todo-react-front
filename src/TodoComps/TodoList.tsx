@@ -1,14 +1,19 @@
 import React from "react";
 import Todo from "./interfaces/Todo"
-import Task from "./interfaces/Task"
 import TodoView from "./TodoView";
+import TodoEdit from "./TodoEdit";
+import Backend from "./service/Backend";
 
-export default class TodoList extends React.Component<{ owner: string }, { todoes: Todo[], loading: boolean }>
+export default class TodoList extends React.Component<{ owner: string },{ todoes: Todo[], loading: boolean }>
 {
+    backend: Backend = Backend.getInstance()
+    editMode: boolean = false
+
     constructor (props: any){
         super(props)
-        this.state = { todoes: [], loading: true}
+        this.state = { todoes: [], loading: true }
         this.updateTodo = this.updateTodo.bind(this)
+        this.editModeEnable = this.editModeEnable.bind(this);
     }
 
     componentDidMount(): void {
@@ -16,43 +21,57 @@ export default class TodoList extends React.Component<{ owner: string }, { todoe
     }
 
     render() {
-        var comp = this.state.loading ? <p><em>Loading...</em></p>
-            : this.state.todoes.map(td =>
-                <TodoView key={td.id} todo={td} callback={this.updateTodo} />
-            )
+        var comp;
+        if (this.state.loading && this.editMode == false){
+            return <p><em>Loading...</em></p>
+        }
 
-        return(
-            <div>
-                <h1 id="todoList">ToDoes</h1>
-                {comp}
-            </div>
-        )
+        comp = <div>
+        <h1>ToDoes</h1>
+            {this.state.todoes.map(td =>
+                <TodoView 
+                    key={td.id}
+                    todo={td}
+                    callback={this.updateTodo}
+                    isOwner={td.owner === this.props.owner}
+                />
+            )}
+            <button className="btn-outline-success" onClick={this.editModeEnable}>Add new</button>
+        </div>
+        
+        return !this.editMode? 
+            comp 
+            : <TodoEdit 
+                    editable={null} 
+                    owner={this.props.owner} 
+                    callback={this.editModeExit} 
+                />
     }
 
     async updateTodo(todo: Todo, taskName: string) {
-        var task = todo.tasks.find(task => task.name == taskName)!
-        this.state.todoes.find(t => t == todo)!
+        var task = todo.tasks.find(task => task.name === taskName)!
+        this.state.todoes.find(t => t === todo)!
             .tasks.find(ts => ts.name === taskName)!.isComplete = !task.isComplete
-        if (await this.updateOnBack(todo)){
+        if (await this.backend.update("todo", todo.id, todo)){
             this.setState({ todoes: this.state.todoes, loading: false}) 
         }
     }
 
     async populate() {
-        const response = await fetch("https://localhost:44314/todo")
-        const data = await response.json()
+        const data = await this.backend.getBy<Todo>("todo", this.props.owner)
+        console.log(data)
         this.setState({todoes: data, loading: false})
     }
 
-    async updateOnBack(td: Todo): Promise<boolean> {
-        const response = await fetch(`https://localhost:44314/todo/upd/${td.id}`,
-            {
-                method: "PUT",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(td)
-            })
-        return response.ok
+    
+    editModeEnable(): void {
+        this.editMode = true;
+        this.setState({loading : true})
+    }
+
+    editModeExit(){
+        this.setState({loading: true})
+        this.editMode = false;
+        this.populate()
     }
 }

@@ -36,3 +36,58 @@
     transform: rotate(360deg);
   }
 }
+
+.card-input {
+  max-width: 300px;
+  border-radius: 8px;
+  border: 1px solid #AAAAAA;
+  padding: 8px;
+  box-shadow: 10px 10px 5px #999999;
+}
+
+.card {
+  max-width: 500px;
+  border-radius: 25px;
+  border: 1px solid #AAAAAA;
+  padding: 20px;
+  padding-top: 5px;
+  margin: 25px;
+  box-shadow: 10px 10px 5px #999999;
+  transition: background-color 0.3s;
+}
+
+.card:hover{
+  background-color: #AABBFF;
+}
+
+.btn-outline-success{
+  border-radius: 5px;
+  padding: 5px;
+  color:  green;
+  border: 1px solid green;
+  transition: all 0.3s;
+  margin: 8px;
+}
+
+.btn-outline-success:hover{
+  background-color: green;
+  color: white;
+}
+
+.btn-outline-error{
+  border-radius: 5px;
+  padding: 5px;
+  color: red;
+  border: 1px solid red;
+  transition: all 0.3s;
+  margin: 8px;
+}
+
+.btn-outline-error:hover{
+  background-color: red;
+  color: white;
+}
+
+.errors{
+  color: red
+}

@@ -1,12 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import Backend from './TodoComps/service/Backend';
 import './App.css';
 import TodoList from './TodoComps/TodoList';
+import Login from './TodoComps/Login';
 
 function App() {
+  var [own, setOwn] = useState("")
+  Backend.getInstance("https://localhost:44314")
+
   return (
     <div>
-      <TodoList owner="" />
+      { own === ""? 
+        <Login callback={setOwn} />
+        : <TodoList owner={own} />
+      }
     </div> 
   );
 }
