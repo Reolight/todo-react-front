@@ -13,7 +13,8 @@ export default class TodoList extends React.Component<{ owner: string },{ todoes
         super(props)
         this.state = { todoes: [], loading: true }
         this.updateTodo = this.updateTodo.bind(this)
-        this.editModeEnable = this.editModeEnable.bind(this);
+        this.editModeEnable = this.editModeEnable.bind(this)
+        this.editModeExit = this.editModeExit.bind(this)
         this.populate = this.populate.bind(this)
     }
 
