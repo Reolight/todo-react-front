@@ -14,7 +14,8 @@ export default function TodoEdit(props: editableProp) {
     const [errors, setErrors] = useState([] as string[])
 
     function init(){
-        const editable = props.editable == null? 
+        console.log(props.editable)
+        const editable = !props.editable? 
             {
                 id:"",
                 name: "new todo",
