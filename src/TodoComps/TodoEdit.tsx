@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Task from "./interfaces/Task";
 import Todo from "./interfaces/Todo";
 import Backend from "./service/Backend";
 
@@ -9,45 +10,54 @@ interface editableProp{
 }
 
 export default function TodoEdit(props: editableProp) {
-    var editable = props.editable == null? 
-        {
-            id:"",
-            name: "new todo",
-            owner: props.owner,
-            tasks: [{
-                name:"",
-                isComplete: false
-            }]
-        } as Todo
-        : props.editable
-
-    const [todo, setTodo] = useState(editable)
+    const [todo, setTodo] = useState({} as Todo)
     const [errors, setErrors] = useState([] as string[])
+
+    function init(){
+        const editable = props.editable == null? 
+            {
+                id:"",
+                name: "new todo",
+                owner: props.owner,
+                tasks: [{
+                    name:"",
+                    isComplete: false
+                }]
+            } as Todo
+            : props.editable
+        setTodo(editable)
+    }
+
+
+    useEffect(init, [props.editable, props.owner])
 //---------------------HANDLERS------------------------------
     const onTaskChanged = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        todo.tasks[index].name = e.target.value;
-        if (index + 1 === todo.tasks.length && e.target.value !== ""){ //here new field is added if last contains smth
-            todo.tasks.push({isComplete: false, name: ""})
-        } else if (index + 2 === todo.tasks.length && e.target.value === ""){ //..if noth, new field is removed.
-            todo.tasks.pop()
+        let t: Task[] = todo.tasks
+        t[index].name = e.target.value
+        if (index + 1 === todo.tasks.length && todo.tasks[index].name !== ""){ //here new field is added if last contains smth
+            t.push({isComplete: false, name: ""})
+        } else if (index + 2 === todo.tasks.length && todo.tasks[index].name === ""
+            && todo.tasks[index].name === ""){ //..if noth, new field is removed.
+            t.pop()
         }
+
+        setTodo({...todo, tasks: t})
     }
 
     const onTodoChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
-        todo.name = e.target.value;
-        console.log(todo.name)
+        setTodo({...todo, name: e.target.value})
     }
 
     function remove(index: number){
-        if (todo.tasks.length === 1)
-            todo.tasks[0] = {name: "", isComplete: false}
-        else
-            todo.tasks.splice(index, 1);
-        setTodo(todo)
+        let t = todo.tasks
+        if (t.length == 1) 
+            t[0].name = ""
+        else t.splice(index, 1)
+        setTodo({...todo, tasks: t})
     }
 
     function validate(): boolean{
-        var err: string[] = []
+        let err: string[] = []
         if (todo.tasks[todo.tasks.length - 1].name === "")
         todo.tasks.pop();
         if (todo.name === "") err.push("ToDo has no name!")
@@ -61,27 +71,34 @@ export default function TodoEdit(props: editableProp) {
 
     async function onSave(){
         if (!validate()) return
-        var backend: Backend = Backend.getInstance()
+        const backend: Backend = Backend.getInstance()
         if (todo.id === "")
             if (await backend.post("todo", todo))
                 props.callback()
-            else setErrors([...errors, "posted failed"])
+            else setErrors(["posted failed"])
         else
             if (await backend.update("todo", todo.id, todo))
                 props.callback()
-            else setErrors([...errors, "update failed"])
+            else setErrors(["update failed"])
     }
 //--------------------JSX ELEMENT------------------------------
-    return(
+    return !todo.tasks? <p>Loading</p> : (
         <div className="card">
-            <input type="text" placeholder="Type todo name" onChange={onTodoChanged}/>
+            <input 
+                type="text" 
+                placeholder="Type todo name"
+                onChange={onTodoChanged} 
+                value={todo.name}
+            />
             <ul>
             {todo.tasks.map((task, index) =>
                 <li key={index}>
                     <input
                         type="text"
                         placeholder="Task name"
-                        onChange={(e) => onTaskChanged(e, index)}/>
+                        onChange={(e) => onTaskChanged(e, index)}
+                        value={task.name}
+                    />
                     <button onClick={() => remove(index)} >X</button>
                 </li>)}
             </ul>
@@ -89,7 +106,7 @@ export default function TodoEdit(props: editableProp) {
                 {errors.map((error, index) => <li key={index}>{error}</li>)}
             </ul>
             <button className="btn-outline-success" onClick={onSave}>
-                {editable.id === ""? "Add todo" : "Save todo"}
+                {todo.id === ""? "Add todo" : "Save todo"}
             </button>
         </div>
     )

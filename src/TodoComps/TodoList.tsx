@@ -14,6 +14,7 @@ export default class TodoList extends React.Component<{ owner: string },{ todoes
         this.state = { todoes: [], loading: true }
         this.updateTodo = this.updateTodo.bind(this)
         this.editModeEnable = this.editModeEnable.bind(this);
+        this.populate = this.populate.bind(this)
     }
 
     componentDidMount(): void {
