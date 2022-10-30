@@ -50,7 +50,7 @@ export default class Backend {
     async delete(relativeUri: string, id: string): Promise<boolean> {
         const response = await fetch(`${this.uri}/${relativeUri}/${id}`,
         {
-            method: "PUT"
+            method: "DELETE"
         })
 
         return response.ok

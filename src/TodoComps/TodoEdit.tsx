@@ -90,6 +90,7 @@ export default function TodoEdit(props: editableProp) {
                 onChange={onTodoChanged} 
                 value={todo.name}
             />
+            <i>({todo.owner})</i>
             <ul>
             {todo.tasks.map((task, index) =>
                 <li key={index}>

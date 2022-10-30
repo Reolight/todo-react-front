@@ -35,6 +35,7 @@ export default class TodoList extends React.Component<{ owner: string },{ todoes
                     todo={td}
                     callback={this.updateTodo}
                     isOwner={td.owner === this.props.owner}
+                    deleteback={this.populate}
                 />
             )}
             <button className="btn-outline-success" onClick={this.editModeEnable}>Add new</button>
