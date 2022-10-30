@@ -74,6 +74,19 @@
   color: white;
 }
 
+
+.btn-outline-error-compact{
+  border-radius: 5px;
+  color: red;
+  margin-left: 8px;
+  border: 1px solid red;
+  transition: all 0.3s;
+}
+.btn-outline-error-compact:hover{
+  background-color: red;
+  color: white;
+}
+
 .btn-outline-error{
   border-radius: 5px;
   padding: 5px;

@@ -101,7 +101,7 @@ export default function TodoEdit(props: editableProp) {
                         onChange={(e) => onTaskChanged(e, index)}
                         value={task.name}
                     />
-                    <button onClick={() => remove(index)} >X</button>
+                    <button className="btn-outline-error-compact" onClick={() => remove(index)} >X</button>
                 </li>)}
             </ul>
             <ul className="errors">
